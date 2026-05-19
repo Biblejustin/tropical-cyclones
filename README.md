@@ -29,13 +29,15 @@ Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k),
 
 **In plain English:** Each bar shows how many deadly cyclones occurred in that 10-year period. The dashed line is the trend — slightly upward, but most of that slope reflects records being more complete after 1900, not actual storms getting more frequent. Inside the modern era (post-1950 with aircraft reconnaissance and satellites), the count is roughly steady.
 
+**Above vs. below the line:** Decades whose bars stick *above* the dashed trend line had more catalogued deadly cyclones than the long-run average predicts; decades *below* the line had fewer. The 1960s–1970s and the 2000s–2010s bars rise above the line — busy stretches. The 1880s–1890s bars are well below — but that's almost certainly a *recording* gap (pre-telegraph cyclones in less-populated coasts went unrecorded), not a real "calmer" period.
+
 ![Decadal counts](plots/02_decadal_counts_by_band.png)
 
 ### Great cyclone timing (≥10,000 deaths)
 
 Cumulative ≥10,000-death cyclone count since 1850 vs the constant-rate reference. Tests whether catastrophic cyclones are accelerating or steady-state.
 
-**In plain English:** Same idea as the volcano and pandemic versions. The grey line is "what we'd see if catastrophic cyclones came at a steady pace." The red staircase is what actually happened. When the staircase tracks the line, the rate is steady; when it pulls ahead or behind, that's a busy or quiet stretch.
+**In plain English:** Same idea as the volcano and pandemic versions. The grey line is "what we'd see if catastrophic cyclones came at a steady pace." The red staircase is what actually happened. **Above vs. below the line:** when the staircase is *above* the dashed reference, ≥10,000-death cyclones have been arriving *faster* than the long-run average rate (a busy stretch); *below* the line means they've been arriving *slower* (a quiet stretch). The cumulative line that runs roughly parallel to the reference is the case of "rate roughly steady."
 
 ![Great cyclone timing](plots/03_great_cyclone_timing.png)
 
@@ -44,6 +46,8 @@ Cumulative ≥10,000-death cyclone count since 1850 vs the constant-rate referen
 Log-log survival function with power-law fit on the ≥1,000-death tail. α ≈ 0.43 — the heaviest tail of any disaster category in this project. A single Bhola-class event dominates the very-large-deaths bin.
 
 **In plain English:** Reading the dots right to left: the further right, the deadlier; the lower a dot, the rarer events at that level are. The dashed line shows the predictable pattern that connects "small common cyclones" to "rare huge ones." The slope (α ≈ 0.43) is shallow compared to most other disaster categories — meaning when cyclones go bad, they go really bad. A single Bhola 1970 (500,000 deaths) is in a category of its own.
+
+**Above vs. below the line:** A dot *above* the dashed line means "more cyclones at this death-count than the scaling rule predicts" — a cluster at that severity. A dot *below* means "fewer than predicted." Looking at the chart: the dots in the 10,000–100,000-death band stack slightly above the line — a real cluster of mid-tier catastrophes (Bay of Bengal events). The handful of dots in the ≥300,000-death range fall further below the line — the truly worst events are even rarer than the scaling rule expects (or rather: Bhola is so far out that it's pulling the fit). The small-end deficit at the top-left is just the catalog cutoff at 1,000 deaths.
 
 ![Death distribution](plots/04_death_distribution.png)
 
