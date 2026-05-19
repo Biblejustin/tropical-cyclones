@@ -19,11 +19,15 @@ Parallel to `earthquakes`, `spaceweather`, `famines-tracking`, `flood-data`, `pa
 
 Deaths vs year, log scale; red = ≥10,000 deaths. The biggest events are annotated. Notable: the Bay of Bengal dominates the top of the distribution, and the 21st century is conspicuously full of mid-tier events but light on ≥100k catastrophes.
 
+**In plain English:** Each circle is one cyclone. The higher it is, the deadlier; the redder it is, the more catastrophic. The y-axis is log scale, meaning each step up is 10× more deaths — needed because death tolls range from hundreds to half a million. Most of the very-deadliest cyclones happened in the Bay of Bengal (Bhola 1970, Hooghly 1737, Haiphong 1881) — that region's combination of shallow water, dense coastal population, and storm tracks makes it the deadliest cyclone basin on Earth.
+
 ![Cyclone deaths timeline](plots/01_cyclone_deaths_timeline.png)
 
 ### Cyclones per decade by death band
 
 Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k), 1850+. Dashed OLS trend with bootstrap 95% CI. The visible upward slope is mostly a pre-1900 detection-floor artifact; post-1900 the rate is roughly steady.
+
+**In plain English:** Each bar shows how many deadly cyclones occurred in that 10-year period. The dashed line is the trend — slightly upward, but most of that slope reflects records being more complete after 1900, not actual storms getting more frequent. Inside the modern era (post-1950 with aircraft reconnaissance and satellites), the count is roughly steady.
 
 ![Decadal counts](plots/02_decadal_counts_by_band.png)
 
@@ -31,11 +35,15 @@ Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k),
 
 Cumulative ≥10,000-death cyclone count since 1850 vs the constant-rate reference. Tests whether catastrophic cyclones are accelerating or steady-state.
 
+**In plain English:** Same idea as the volcano and pandemic versions. The grey line is "what we'd see if catastrophic cyclones came at a steady pace." The red staircase is what actually happened. When the staircase tracks the line, the rate is steady; when it pulls ahead or behind, that's a busy or quiet stretch.
+
 ![Great cyclone timing](plots/03_great_cyclone_timing.png)
 
 ### Death-toll distribution
 
 Log-log survival function with power-law fit on the ≥1,000-death tail. α ≈ 0.43 — the heaviest tail of any disaster category in this project. A single Bhola-class event dominates the very-large-deaths bin.
+
+**In plain English:** Reading the dots right to left: the further right, the deadlier; the lower a dot, the rarer events at that level are. The dashed line shows the predictable pattern that connects "small common cyclones" to "rare huge ones." The slope (α ≈ 0.43) is shallow compared to most other disaster categories — meaning when cyclones go bad, they go really bad. A single Bhola 1970 (500,000 deaths) is in a category of its own.
 
 ![Death distribution](plots/04_death_distribution.png)
 
