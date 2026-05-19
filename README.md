@@ -9,10 +9,35 @@ Parallel to `earthquakes`, `spaceweather`, `famines-tracking`, `flood-data`, `pa
 - **37 major cyclones since 1737**; **18 with ≥10,000 deaths**.
 - **Bay of Bengal dominates the top of the distribution**: 1737 Hooghly River cyclone (300k), 1970 Bhola (500k — deadliest tropical cyclone ever recorded), 1881 Haiphong (300k), 1839 Coringa (300k), 1876 Backergunge (200k), 1991 Bangladesh cyclone (138k).
 - **No deadly-event drop-off in modern era despite forecasting improvements** — recent events like 2008 Cyclone Nargis (138k, Myanmar) and 2013 Typhoon Haiyan (6,340, Philippines) show that political/preparedness factors still drive death tolls more than meteorology.
+- **Post-1850 decadal trend = +0.017 cyclones/decade [95% CI +0.004, +0.026]** — small positive, but this is mostly catalog cleanup of pre-1900 undercounting. The 1950+ trend is flat.
 - **Power-law tail with α ≈ 0.43** on the log-log survival curve above 1,000 deaths. Same regime as quakes/famines/wars but flatter (heavier tail) — death tolls concentrate at the extreme.
 - **No US event over 10,000 deaths since 1900 Galveston** (≈8,000). Modern US cyclone deaths are dominated by inland flooding and infrastructure failure (Katrina 2005, Maria 2017, Helene 2024), not direct storm winds.
 
-See `plots/` for the four charts.
+## Sample output
+
+### Cyclone deaths over time
+
+Deaths vs year, log scale; red = ≥10,000 deaths. The biggest events are annotated. Notable: the Bay of Bengal dominates the top of the distribution, and the 21st century is conspicuously full of mid-tier events but light on ≥100k catastrophes.
+
+![Cyclone deaths timeline](plots/01_cyclone_deaths_timeline.png)
+
+### Cyclones per decade by death band
+
+Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k), 1850+. Dashed OLS trend with bootstrap 95% CI. The visible upward slope is mostly a pre-1900 detection-floor artifact; post-1900 the rate is roughly steady.
+
+![Decadal counts](plots/02_decadal_counts_by_band.png)
+
+### Great cyclone timing (≥10,000 deaths)
+
+Cumulative ≥10,000-death cyclone count since 1850 vs the constant-rate reference. Tests whether catastrophic cyclones are accelerating or steady-state.
+
+![Great cyclone timing](plots/03_great_cyclone_timing.png)
+
+### Death-toll distribution
+
+Log-log survival function with power-law fit on the ≥1,000-death tail. α ≈ 0.43 — the heaviest tail of any disaster category in this project. A single Bhola-class event dominates the very-large-deaths bin.
+
+![Death distribution](plots/04_death_distribution.png)
 
 ## What's in it
 
@@ -25,22 +50,6 @@ See `plots/` for the four charts.
 - `sources_notes`
 
 Coverage: 1737 Hooghly River cyclone → 2024 Helene/Milton.
-
-## Plots
-
-`make_plots.py` generates four standalone analytical plots:
-
-### `plots/01_cyclone_deaths_timeline.png`
-Deaths vs year scatter, log y-axis, red = ≥10,000 deaths. Bubble size ∝ √deaths. Annotated outliers include Bhola, Hooghly, Haiphong, Coringa.
-
-### `plots/02_decadal_counts_by_band.png`
-Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k). Catalog starts 1850 for trend purposes.
-
-### `plots/03_great_cyclone_timing.png`
-Cumulative ≥10,000-death cyclone count vs constant-rate reference + inter-event interval bar chart. Tests whether catastrophic cyclones are accelerating or steady-state.
-
-### `plots/04_death_distribution.png`
-Log-log survival function with power-law fit on the ≥1,000-death tail. α ≈ 0.43 (heavy tail).
 
 ## Detection-bias notes
 
