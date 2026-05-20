@@ -2,7 +2,7 @@
 
 Major hurricanes / typhoons / cyclones with ≥1000 deaths (with a few notable lower-death events included for impact).
 
-Parallel to `earthquakes`, `spaceweather`, `famines-tracking`, `flood-data`, `pandemics-tracking`, `volcanic-eruptions`.
+One of 10 sibling repos analyzed together — see the [`correlations`](https://github.com/Biblejustin/correlations) hub for the cross-repo analysis.
 
 ## Quick findings
 
