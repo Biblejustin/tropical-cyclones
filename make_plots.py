@@ -1,10 +1,8 @@
 """Tropical cyclone analysis plots.
 
-Conventions:
-- Detection-clean for ≥1000 deaths since ~1850 (telegraph era)
-- Aircraft recon 1944+; satellite 1979+
-- Cumulative-vs-constant for ≥10,000-death cyclones
-- Power-law on the tail
+These plots describe a selected historical event list, not complete global
+cyclone surveillance. Fatality totals combine physical hazard and human exposure.
+Reference fits do not establish acceleration, flatness, or a power-law model.
 """
 from __future__ import annotations
 from pathlib import Path
@@ -18,6 +16,7 @@ PLOTS = HERE / "plots"
 PLOTS.mkdir(exist_ok=True)
 
 CATALOG_START = 1850
+CATALOG_END = 2024  # Explicit represented snapshot scope, not inferred surveillance coverage.
 GREAT_CYCLONE_THRESHOLD = 10_000
 PARTIAL_DECADE_START = 2020
 
@@ -31,8 +30,25 @@ plt.rcParams.update({
 
 def load_events() -> pd.DataFrame:
     df = pd.read_csv(HERE / "cyclones.csv")
-    df["deaths_estimate"] = pd.to_numeric(df["deaths_estimate"], errors="coerce").fillna(0)
+    df["deaths_estimate"] = pd.to_numeric(df["deaths_estimate"], errors="coerce")
     return df
+
+
+def fit_line(x, y, min_points=2):
+    """Descriptive OLS with explicit guards for unusable or constant inputs."""
+    x, y = np.asarray(x, dtype=float), np.asarray(y, dtype=float)
+    valid = np.isfinite(x) & np.isfinite(y)
+    x, y = x[valid], y[valid]
+    if len(x) < min_points or np.unique(x).size < 2:
+        return None
+    if np.ptp(y) == 0:
+        return 0.0, float(y[0])
+    centered = x - x.mean()
+    variance = float(np.dot(centered, centered))
+    if variance <= 0:
+        return None
+    slope = float(np.dot(centered, y-y.mean()) / variance)
+    return slope, float(y.mean()-slope*x.mean())
 
 
 def fmt_thousands(x, _):
@@ -40,6 +56,7 @@ def fmt_thousands(x, _):
 
 
 def plot_01_deaths_timeline(df: pd.DataFrame):
+    df = df[df['deaths_estimate'] > 0].copy()
     fig, ax = plt.subplots(figsize=(11, 5.5))
     sizes = np.clip(np.sqrt(df["deaths_estimate"]) / 4, 30, 1200)
     colors = ["#cc3322" if d >= GREAT_CYCLONE_THRESHOLD else "#3377aa"
@@ -49,7 +66,7 @@ def plot_01_deaths_timeline(df: pd.DataFrame):
     ax.set_yscale("log")
     ax.set_ylabel("Deaths (log)")
     ax.set_xlabel("Year")
-    ax.set_title("Tropical cyclone deaths over time — red = ≥10,000 deaths, bubble size ∝ √deaths")
+    ax.set_title("Selected cyclone deaths — red ≥10,000; bubble size ∝ √deaths")
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(fmt_thousands))
     # Annotate biggest
     for _, row in df.nlargest(8, "deaths_estimate").iterrows():
@@ -68,7 +85,7 @@ def plot_02_decadal_counts_by_band(df: pd.DataFrame):
              (10_000, 100_000, "10k–100k", "#dd9966"),
              (100_000, np.inf, "≥100k", "#cc3322")]
     fig, ax = plt.subplots(figsize=(11, 5))
-    decades = np.arange(CATALOG_START, 2030, 10)
+    decades = np.arange(CATALOG_START, CATALOG_END+1, 10)
     bottom = np.zeros(len(decades))
     for lo, hi, label, color in bands:
         counts = []
@@ -81,13 +98,13 @@ def plot_02_decadal_counts_by_band(df: pd.DataFrame):
                 color=color, edgecolor="black", linewidth=0.4)
         bottom += counts
     ax.axvspan(PARTIAL_DECADE_START, PARTIAL_DECADE_START + 10,
-                color="grey", alpha=0.18, label="partial")
+                color="grey", alpha=0.18, label="partial decade in snapshot")
     # Multi-era trend lines
     totals = np.array(bottom, dtype=float)
     eras = [
-        (CATALOG_START, "Full catalog (1850+)", "#222222", "--"),
-        (1944, "Aircraft-recon era (1944+)", "#33aa66", ":"),
-        (1979, "Satellite era / IBTrACS (1979+)", "#3366cc", "-."),
+        (CATALOG_START, "Selected decades 1850+", "#222222", "--"),
+        (1944, "Selected decades 1950+", "#33aa66", ":"),
+        (1979, "Selected decades 1980+", "#3366cc", "-."),
     ]
     fits = []
     rng = np.random.default_rng(42)
@@ -96,21 +113,29 @@ def plot_02_decadal_counts_by_band(df: pd.DataFrame):
         if mask.sum() < 3:
             fits.append((label, np.nan, np.nan, np.nan)); continue
         x_fit = decades[mask].astype(float); y_fit = totals[mask]
-        slope, intercept = np.polyfit(x_fit, y_fit, 1)
+        fit = fit_line(x_fit, y_fit, min_points=3)
+        if fit is None:
+            fits.append((label, np.nan, np.nan, np.nan)); continue
+        slope, intercept = fit
         boots = []
         for _ in range(2000):
             idx = rng.integers(0, len(x_fit), len(x_fit))
-            s, _ = np.polyfit(x_fit[idx], y_fit[idx], 1)
-            boots.append(s)
-        lo, hi = np.percentile(boots, [2.5, 97.5])
-        line_x = np.linspace(era_start, decades.max(), 50)
+            # A bootstrap draw may repeat one decade exclusively; its slope
+            # is undefined and must not enter the resampling distribution.
+            if np.unique(x_fit[idx]).size < 2:
+                continue
+            draw = fit_line(x_fit[idx], y_fit[idx])
+            if draw is not None:
+                boots.append(draw[0])
+        lo, hi = np.percentile(boots, [2.5, 97.5]) if len(boots) >= 2 else (np.nan, np.nan)
+        line_x = np.linspace(x_fit.min(), x_fit.max(), 50)
         ax.plot(line_x, slope * line_x + intercept, ls, color=color,
                   linewidth=1.6,
-                  label=f"{label}: {slope:+.3f}/dec [CI {lo:+.3f}, {hi:+.3f}]")
+                  label=f"{label}: Δ count/decade {slope*10:+.2f} [bootstrap {lo*10:+.2f}, {hi*10:+.2f}]")
         fits.append((label, slope, lo, hi))
     ax.set_xlabel("Decade")
-    ax.set_ylabel("Cyclones per decade")
-    ax.set_title(f"Cyclones per decade by death band (catalog ≥{CATALOG_START})")
+    ax.set_ylabel("Listed cyclones per decade")
+    ax.set_title(f"Selected cyclone counts by death band ({CATALOG_START}–{CATALOG_END}); descriptive fits")
     ax.legend(loc="upper left", fontsize=8)
     plt.tight_layout()
     plt.savefig(PLOTS / "02_decadal_counts_by_band.png")
@@ -119,23 +144,26 @@ def plot_02_decadal_counts_by_band(df: pd.DataFrame):
 
 
 def plot_03_great_cyclone_timing(df: pd.DataFrame):
-    great = df[df["deaths_estimate"] >= GREAT_CYCLONE_THRESHOLD].sort_values("year").reset_index(drop=True)
+    great = df[(df["deaths_estimate"] >= GREAT_CYCLONE_THRESHOLD) &
+               df['year'].between(CATALOG_START, CATALOG_END)].sort_values("year").reset_index(drop=True)
     great["n"] = np.arange(1, len(great) + 1)
     if len(great) < 2:
         return
-    span_yr = great["year"].iloc[-1] - CATALOG_START
+    span_yr = CATALOG_END - CATALOG_START + 1
+    if span_yr <= 0:
+        return
     rate = len(great) / span_yr
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 5))
-    yrs = np.arange(CATALOG_START, 2026)
+    yrs = np.arange(CATALOG_START, CATALOG_END+2)
     ax = axes[0]
-    ax.step(great["year"], great["n"], where="post",
-            color="#cc3322", linewidth=2, label="Observed ≥10k cumulative")
+    ax.step(np.r_[great["year"], CATALOG_END+1], np.r_[great["n"], len(great)], where="post",
+            color="#cc3322", linewidth=2, label="Listed ≥10k cumulative")
     ax.plot(yrs, rate * (yrs - CATALOG_START), color="gray", linestyle="--",
-            label=f"Constant rate ({rate:.3f}/yr)")
+            label=f"Selected-list reference ({rate:.3f}/yr)")
     ax.set_xlabel("Year")
-    ax.set_ylabel("Cumulative ≥10,000-death cyclones")
-    ax.set_title(f"Cumulative vs constant-rate ({CATALOG_START}+)")
+    ax.set_ylabel("Cumulative listed ≥10,000-death cyclones")
+    ax.set_title(f"Selected events vs fixed-scope reference ({CATALOG_START}–{CATALOG_END})")
     ax.legend()
 
     ax = axes[1]
@@ -147,8 +175,8 @@ def plot_03_great_cyclone_timing(df: pd.DataFrame):
                     label=f"mean = {intervals.mean():.1f} yr")
         ax.set_xticks(range(len(intervals)))
         ax.set_xticklabels([f"#{i+1}" for i in range(len(intervals))], fontsize=8)
-        ax.set_ylabel("Years between great cyclones")
-        ax.set_title("Inter-event intervals")
+        ax.set_ylabel("Years between listed onsets")
+        ax.set_title("Year-resolution gaps within selected list")
         ax.legend()
     plt.tight_layout()
     plt.savefig(PLOTS / "03_great_cyclone_timing.png")
@@ -165,21 +193,25 @@ def plot_04_magnitude_distribution(df: pd.DataFrame):
     if tail_mask.sum() >= 5:
         x_tail = np.log10(deaths[tail_mask])
         y_tail = np.log10(survival[tail_mask])
-        slope, intercept = np.polyfit(x_tail, y_tail, 1)
-        alpha = -slope
+        fit = fit_line(x_tail, y_tail, min_points=5)
+        if fit is not None:
+            slope, intercept = fit
+            alpha = -slope
+        else:
+            alpha = None
     else:
         alpha = None
 
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.loglog(deaths, survival, "o", color="#cc3322", alpha=0.7,
-                markeredgecolor="black", markersize=6, label="Cyclones")
+                markeredgecolor="black", markersize=6, label="Listed cyclones")
     if alpha is not None:
         xs = np.logspace(np.log10(1000), np.log10(deaths.max()), 50)
         ys = 10 ** intercept * xs ** slope
-        ax.loglog(xs, ys, "--", color="gray", label=f"Power-law fit α={alpha:.2f}")
+        ax.loglog(xs, ys, "--", color="gray", label=f"Descriptive log-log slope −{alpha:.2f}")
     ax.set_xlabel("Deaths (log)")
     ax.set_ylabel("Survival count")
-    ax.set_title("Cyclone death-toll distribution (tail above 1,000)")
+    ax.set_title("Selected death-toll distribution (≥1,000-death reference line)")
     ax.legend()
     plt.tight_layout()
     plt.savefig(PLOTS / "04_death_distribution.png")
@@ -193,9 +225,10 @@ def main():
     plot_01_deaths_timeline(df)
     fits = plot_02_decadal_counts_by_band(df)
     for label, slope, lo, hi in fits:
-        print(f"  {label:<40} {slope:+.3f}/dec  [CI {lo:+.3f}, {hi:+.3f}]")
+        print(f"  {label:<40} Δ count/decade {slope*10:+.2f} [bootstrap range {lo*10:+.2f}, {hi*10:+.2f}]")
     plot_03_great_cyclone_timing(df)
     plot_04_magnitude_distribution(df)
+    print("Fits describe selected catalogue rows; completeness and population trends are unestablished.")
     print(f"Wrote 4 plots to {PLOTS}/")
 
 

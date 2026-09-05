@@ -1,81 +1,48 @@
 # tropical-cyclones
 
-Major hurricanes / typhoons / cyclones with ≥1000 deaths (with a few notable lower-death events included for impact).
+Selected historical cyclone events and descriptive plots. `cyclones.csv` contains **36 events spanning 1737–2024**, including **18 with reported deaths ≥10,000**. Most entries exceed 1,000 deaths; several lower-death events are included for context. This is a curated list, not a complete IBTrACS extract or a verified global mortality catalogue.
 
-One of 10 sibling repos analyzed together — see the [`correlations`](https://github.com/Biblejustin/correlations) hub for the cross-repo analysis.
+Part of the [`correlations`](https://github.com/Biblejustin/correlations) project.
 
-## Quick findings
+## Reading the plots
 
-- **37 major cyclones since 1737**; **18 with ≥10,000 deaths**.
-- **Bay of Bengal dominates the top of the distribution**: 1737 Hooghly River cyclone (300k), 1970 Bhola (500k — deadliest tropical cyclone ever recorded), 1881 Haiphong (300k), 1839 Coringa (300k), 1876 Backergunge (200k), 1991 Bangladesh cyclone (138k).
-- **No deadly-event drop-off in modern era despite forecasting improvements** — recent events like 2008 Cyclone Nargis (138k, Myanmar) and 2013 Typhoon Haiyan (6,340, Philippines) show that political/preparedness factors still drive death tolls more than meteorology.
-- **Post-1850 decadal trend = +0.017 cyclones/decade [95% CI +0.004, +0.026]** — small positive, but this is mostly catalog cleanup of pre-1900 undercounting. The 1950+ trend is flat.
-- **Power-law tail with α ≈ 0.43** on the log-log survival curve above 1,000 deaths. Same regime as quakes/famines/wars but flatter (heavier tail) — death tolls concentrate at the extreme.
-- **No US event over 10,000 deaths since 1900 Galveston** (≈8,000). Modern US cyclone deaths are dominated by inland flooding and infrastructure failure (Katrina 2005, Maria 2017, Helene 2024), not direct storm winds.
+Fatalities reflect storm characteristics, population exposure, preparedness, infrastructure and reporting. This list cannot separate those effects or establish that global cyclone frequency is rising, falling or flat. A high fatality threshold does not by itself establish historical completeness.
 
-## Sample output
+### Reported deaths over time
 
-### Cyclone deaths over time
+Each point represents a listed event with a positive mortality estimate. Red points have ≥10,000 reported deaths. The logarithmic axis accommodates the wide range of estimates; historical estimates remain uncertain.
 
-Deaths vs year, log scale; red = ≥10,000 deaths. The biggest events are annotated. Notable: the Bay of Bengal dominates the top of the distribution, and the 21st century is conspicuously full of mid-tier events but light on ≥100k catastrophes.
+![Selected cyclone deaths](plots/01_cyclone_deaths_timeline.png)
 
-**In plain English:** Each circle is one cyclone. The higher it is, the deadlier; the redder it is, the more catastrophic. The y-axis is log scale, meaning each step up is 10× more deaths — needed because death tolls range from hundreds to half a million. Most of the very-deadliest cyclones happened in the Bay of Bengal (Bhola 1970, Hooghly 1737, Haiphong 1881) — that region's combination of shallow water, dense coastal population, and storm tracks makes it the deadliest cyclone basin on Earth.
+### Selected counts by decade
 
-![Cyclone deaths timeline](plots/01_cyclone_deaths_timeline.png)
+Bars count listed events in three mortality bands. Lines describe the recorded counts across several historical subsets, excluding the partial 2020s decade. The legend reports the change in decadal count per elapsed decade and a bootstrap resampling range.
 
-### Cyclones per decade by death band
+Resampling describes sensitivity within this selected dataset. It does not correct selection bias, establish surveillance completeness, or provide a global cyclone trend. Bootstrap samples containing only one distinct decade are excluded because their slope is undefined. Constant count samples have zero descriptive slope.
 
-Stacked bars: cyclones per decade by death band (1k–10k, 10k–100k, ≥100k), 1850+. Dashed OLS trend with bootstrap 95% CI. The visible upward slope is mostly a pre-1900 detection-floor artifact; post-1900 the rate is roughly steady.
+![Selected decadal counts](plots/02_decadal_counts_by_band.png)
 
-**In plain English:** Each bar shows how many deadly cyclones occurred in that 10-year period. The dashed line is the trend — slightly upward, but most of that slope reflects records being more complete after 1900, not actual storms getting more frequent. Inside the modern era (post-1950 with aircraft reconnaissance and satellites), the count is roughly steady.
+### Timing of listed ≥10,000-death events
 
-**Above vs. below the line:** Decades whose bars stick *above* the dashed trend line had more catalogued deadly cyclones than the long-run average predicts; decades *below* the line had fewer. The 1960s–1970s and the 2000s–2010s bars rise above the line — busy stretches. The 1880s–1890s bars are well below — but that's almost certainly a *recording* gap (pre-telegraph cyclones in less-populated coasts went unrecorded), not a real "calmer" period.
+The staircase includes qualifying entries within the fixed 1850–2024 snapshot scope. The straight reference uses that entire interval, including years after the last qualifying entry. The gap panel uses recorded onset years; two events in one year can have a zero year-resolution gap. These figures do not test global acceleration or steady-state frequency.
 
-![Decadal counts](plots/02_decadal_counts_by_band.png)
+![Selected event timing](plots/03_great_cyclone_timing.png)
 
-### Great cyclone timing (≥10,000 deaths)
+### Reported mortality distribution
 
-Cumulative ≥10,000-death cyclone count since 1850 vs the constant-rate reference. Tests whether catastrophic cyclones are accelerating or steady-state.
+The survival-count plot describes positive mortality estimates in the list. Its log-log line is a descriptive fit above 1,000 deaths. It does not establish a power-law population distribution or comparability with other disaster catalogues.
 
-**In plain English:** Same idea as the volcano and pandemic versions. The grey line is "what we'd see if catastrophic cyclones came at a steady pace." The red staircase is what actually happened. **Above vs. below the line:** when the staircase is *above* the dashed reference, ≥10,000-death cyclones have been arriving *faster* than the long-run average rate (a busy stretch); *below* the line means they've been arriving *slower* (a quiet stretch). The cumulative line that runs roughly parallel to the reference is the case of "rate roughly steady."
+![Selected mortality distribution](plots/04_death_distribution.png)
 
-![Great cyclone timing](plots/03_great_cyclone_timing.png)
+## Data and limitations
 
-### Death-toll distribution
+Columns: `year`, `month`, `name`, `region`, `deaths_estimate`, `sources_notes`. Month precision does not support exact-day coincidence tests. Missing mortality remains unknown.
 
-Log-log survival function with power-law fit on the ≥1,000-death tail. α ≈ 0.43 — the heaviest tail of any disaster category in this project. A single Bhola-class event dominates the very-large-deaths bin.
+The erroneous May 2003 “Cyclone Sidr” row was removed; the November 2007 Sidr entry remains. Original source notes are retained. Direct event-level citations, stable source identifiers and an independently assessed inclusion rule are still needed before this list can support stronger population claims.
 
-**In plain English:** Reading the dots right to left: the further right, the deadlier; the lower a dot, the rarer events at that level are. The dashed line shows the predictable pattern that connects "small common cyclones" to "rare huge ones." The slope (α ≈ 0.43) is shallow compared to most other disaster categories — meaning when cyclones go bad, they go really bad. A single Bhola 1970 (500,000 deaths) is in a category of its own.
+Source references include [NOAA IBTrACS](https://www.ncei.noaa.gov/products/international-best-track-archive), national meteorological records, and EM-DAT/CRED mortality estimates. These references do not mean every listed estimate or the catalogue's completeness has been independently validated.
 
-**Above vs. below the line:** A dot *above* the dashed line means "more cyclones at this death-count than the scaling rule predicts" — a cluster at that severity. A dot *below* means "fewer than predicted." Looking at the chart: the dots in the 10,000–100,000-death band stack slightly above the line — a real cluster of mid-tier catastrophes (Bay of Bengal events). The handful of dots in the ≥300,000-death range fall further below the line — the truly worst events are even rarer than the scaling rule expects (or rather: Bhola is so far out that it's pulling the fit). The small-end deficit at the top-left is just the catalog cutoff at 1,000 deaths.
-
-![Death distribution](plots/04_death_distribution.png)
-
-## What's in it
-
-`cyclones.csv` — columns:
-
-- `year`, `month` — landfall / peak
-- `name` — common name (modern events have official IBTrACS names; pre-1953 unnamed events listed by location)
-- `region`
-- `deaths_estimate`
-- `sources_notes`
-
-Coverage: 1737 Hooghly River cyclone → 2024 Helene/Milton.
-
-## Detection-bias notes
-
-| Era | Coverage |
-|---|---|
-| Pre-1850 | Concentrated on European-colonial-trade-routes events; non-impacting cyclones unrecorded |
-| 1850–1900 | Telegraph-era; coastal landfalls in inhabited regions documented |
-| 1900–1950 | Meteorological services in major basins; open-ocean cyclones still missed |
-| 1950–present | Aircraft reconnaissance + radar; near-complete for Cat 1+ landfalls |
-| 1979–present | Satellite era; complete for tropical-storm-strength systems globally (IBTrACS) |
-
-For correlation work, **≥1000-deaths is the detection-clean band back to ~1850** (and arguably earlier in the Bay of Bengal, which has been a population hotspot for cyclone-prone shoreline for millennia).
-
-## Reproducing the plots
+## Reproduce plots
 
 ```bash
 python3 -m venv .venv
@@ -83,12 +50,4 @@ python3 -m venv .venv
 .venv/bin/python make_plots.py
 ```
 
-## Source
-
-- Primary: IBTrACS (International Best Track Archive for Climate Stewardship), NOAA — https://www.ncei.noaa.gov/products/international-best-track-archive
-- Pre-IBTrACS events: Boose et al. (2004), Emanuel (2005), various national meteorological records
-- Death-toll consensus from EM-DAT and the Centre for Research on the Epidemiology of Disasters
-
-## Intended use
-
-Data source for tropical-cyclone correlation tests in [`Biblejustin/correlations`](https://github.com/Biblejustin/correlations).
+Outputs are four PNGs under `plots/`. Empty, nonfinite or constant predictor inputs do not receive an undefined fitted slope.
